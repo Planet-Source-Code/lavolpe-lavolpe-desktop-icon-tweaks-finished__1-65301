@@ -1,0 +1,314 @@
+// header data
+[
+  // Universal Unique Identifier 	
+  //	Use GUIDGEN.EXE from your VB CD (gui)
+  //	or use UUIDGEN.EXE > guid.txt from cmd line (also on VB CD)
+  uuid(C317B2AE-72FD-4f01-9EAC-DD119F84302B),
+
+  // Syntax: version(major.minor)
+  version(1.0),
+
+  // This is what will show in the object browser/VB project References listing
+  helpstring("LaVolpe Desktop Tweaker"),
+
+  // Locale Identifier (LCID) and/or Language (Standard-English) 0x9
+  // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wceinternational5/html/wce50lrflocaleidentifiers.asp
+  lcid(0x0409),
+]
+
+// TLB name, the .TLB extension will be applied upon compilation
+library DeskTopHook
+
+{
+// add any addition tlbs to be included with this one:
+   importlib("stdole2.tlb");
+
+   typedef struct { 
+      long   Left;
+      long   Top;
+      long   Right;
+      long   Bottom; 
+   } RECT;
+
+   typedef struct { 
+      long   X;
+      long   Y; 
+   } POINT;
+
+    typedef struct {
+	long hwndFrom;
+    	long idfrom;
+    	long code;
+   } NMHDR;
+   
+
+    typedef struct {
+      NMHDR hdr;
+      long dwDrawStage;
+      long hdc;
+      RECT rc;
+      long dwItemSpec;
+      long uItemState;
+      long lItemlParam;
+    } NMCUSTOMDRAW;
+
+  typedef struct {
+	NMCUSTOMDRAW nmcd;
+	long clrText;
+	long clrTextBk;
+	long iSubItem;
+	long dwItemType;
+	RECT rcText;
+	long uAlign;
+   } NMLVCUSTOMDRAW;
+
+    typedef struct {
+	long	lParam;
+	long 	wParam;
+	long	message;
+	long 	hwnd;
+    } CWPSTRUCT;
+
+   typedef struct { 
+  	long mask; 
+  	long iItem; 
+  	long iSubItem; 
+  	long state; 
+  	long stateMask; 
+  	long pszText; 
+  	long cchTextMax; 
+  	long iImage; 
+  	long lParam;
+  	#if (_WIN32_IE >= 0x0300)
+    	    long iIndent;
+	#endif
+	long iGroupId;
+     } tlbLVITEM;
+
+    typedef struct {
+      NMHDR hdr;
+      tlbLVITEM item;
+     } LV_DISPINFO;
+
+   typedef struct {
+  	NMHDR hdr;
+  	long iItem;
+  	long iSubItem;
+  	long uNewState;
+  	long uOldState;
+  	long uChanged;
+  	POINT ptAction;
+  	long lParam;
+   } NMLISTVIEW;
+
+
+	typedef struct {
+		long	cbSize;
+		long	Style;
+		long	lpfnWndProc;
+		long	cbClsExtra;
+		long	cbWndExtra;
+		long	hInstance;
+		long	hIcon;
+		long	hCursor;
+		long	hbrBackground;
+		long	lpszMenuName;
+		long	lpszClassName;
+		long	hIconSm;
+	} WNDCLASSEX;
+
+
+    [dllname("<invalid typelib>")]
+    module Constants {
+      const long lvNULL			= 0;
+      const long WM_ACTIVATE		= 6;
+      const long WM_ACTIVATEAPP 	= 28;
+      const long WM_CLOSE		= 16;
+      const long WM_DEVMODECHANGE 	= 27;
+      const long WM_NULL		= 0;
+      const long WM_DESTROY 		= 2;
+      const long WM_ENDSESSION		= 22;
+      const long WM_GETICON		= 127;
+      const long WM_MBUTTONDOWN 	= 519;
+      const long WM_LBUTTONDOWN 	= 513;
+      const long WM_LBUTTONDBLCLK	= 515;
+      const long WM_RBUTTONDOWN 	= 516;
+      const long WM_XBUTTONDOWN 	= 523;
+      const long WM_KILLFOCUS		= 8;
+      const long WM_NOTIFY 		= 78;
+      const long WM_PARENTNOTIFY	= 528;
+      const long WM_SETFOCUS 		= 7;
+      const long WM_SETICON		= 128;
+      const long WM_SETTEXT 		= 12;
+      const long WM_SETTINGCHANGE 	= 26;
+      const long WM_SYSCOLORCHANGE	= 21;
+      const long WM_SYSCOMMAND		= 274;
+      const long WM_INITMENU 		= 278;
+      const long WM_MENUSELECT 		= 287;
+      const long WM_EXITMENULOOP 	= 530;
+      const long WM_INITMENUPOPUP 	= 279;
+      const long WM_USER		= 1024;
+      const long WH_CBT			= 5;
+      const long GWL_WNDPROC 		= -4;
+      const long MF_BYPOSITION 		= 1024;
+      const long MF_STRING 		= 0;
+      const long MF_SEPARATOR 		= 2048;
+      const long MF_POPUP 		= 16;
+      const long MF_GRAYED 		= 1;
+      const long MF_DISABLED 		= 2;
+      const long MF_CHECKED 		= 8;
+      const long MF_RIGHTJUSTIFY 	= 1024;
+      const long NM_CUSTOMDRAW 		= -12;
+      const long CDRF_DODEFAULT 	= 0;
+      const long CDRF_NOTIFYITEMDRAW 	= 32;
+      const long CDDS_ITEM 		= 65536;
+      const long CDDS_PREERASE 		= 3;
+      const long CDDS_PREPAINT 		= 1;
+      const long CDDS_SUBITEM 		= 131072;
+      const long CDDS_ITEMPREPAINT 	= 65537;
+      const long CDDS_ITEMPREERASE 	= 65539;
+      const long CDIS_DEFAULT 		= 32;
+      const long LVM_GETITEMCOUNT 	= 4100;
+      const long LVM_REDRAWITEMS 	= 4117;
+      const long LVM_GETSELECTEDCOUNT 	= 4146;
+      const long LVM_GETITEM		= 4101;
+      const long LVM_GETIMAGELIST	= 4098;
+      const long LVM_GETITEMTEXT 	= 4141;
+      const long LVN_GETDISPINFOA	= -150;
+      const long LVN_GETDISPINFOW	= -177;
+      const long LVN_DELETEITEM		= -103;
+      const long LVN_INSERTITEM		= -102;
+      const long LVN_ITEMCHANGED	= -101;
+      const long LVIF_TEXT 		= 1;
+      const long LVIF_IMAGE 		= 2;
+      const long LVIF_STATE 		= 8;
+      const long LVIS_SELECTED 		= 2;
+      const long SMTO_ABORTIFHUNG 	= 2;
+      const long SECTION_MAP_WRITE  	= 2;
+      const long PAGE_READWRITE 	= 4;
+      const long FILE_MAP_WRITE 	= 2;
+      const long ERROR_ALREADY_EXISTS 	= 183;
+      const long cMaxLen		= 260;
+      const long WC_NO_BEST_FIT_CHARS 	= 1024;
+      const LPSTR WM_cPrivate = "571B39B6BC5944028F634100FF880C92";
+      const LPSTR WM_altPrivate = "C643B78DE0FC4e1398CE349695B81F18";
+      const LPSTR mnuMain 	= "Desktop Icon Twea&ker";
+      const LPSTR mnuHide 	= "&Hide Desktop Now";
+      const LPSTR mnuSave 	= "&Save Icon Positions";
+      const LPSTR mnuRestore 	= "&Restore Icon Positions";
+      const LPSTR mnuUnRestore 	= "&Un-Restore Icon Positions";	
+      const LPSTR mnuAuto 	= "Auto-Hide &Desktop";
+      const LPSTR mnuActive 	= "Twea&king";
+      const LPSTR mnuApp 	= "&More Options";
+    };
+
+
+    [dllname("kernel32.dll")]
+    module Kernel32 {
+      [entry("GetTickCount")]
+		long GetTickCount(void);
+      [entry("GetModuleHandleA")] 
+	         long GetModuleHandle([in] LPSTR lpModuleName);
+      [entry("GetProcAddress")] 
+	 	long GetProcAddress([in] long hModule,  [in] LPSTR lpProcName);
+      [entry("RtlMoveMemory")] 
+         	void CopyMemory([in] void* hpvDest, [in] void* hpvSource, [in] long cbCopy);
+      [entry("LoadLibraryA")]
+	        long LoadLibrary ([in] LPSTR lpLibFileName);
+      [entry("FreeLibrary")]
+         	long FreeLibrary([in] long hLibModule);
+      [entry("lstrcpyA")]
+		long lstrcpyA([in] void* lpString1, [in] void* lpString2);
+      [entry("lstrcpyW")]
+		long lstrcpyW([in] void* lpString1, [in] void* lpString2);
+      [entry("lstrlenA")]
+		long lstrlenA([in] void* lpString);
+      [entry("lstrlenW")]
+		long lstrlenW([in] void* lpString);
+      [entry("lstrcmpiA")]
+	 	long lstrcmpiA([in] LPSTR lpString1, [in] LPSTR lpString2);
+      [entry("lstrcmpiW")]
+	 	long lstrcmpiW([in] LPSTR lpString1, [in] LPSTR lpString2);
+      [entry("CloseHandle")]
+	        long CloseHandle([in] long hObject);
+      [entry("CreateFileMappingA")]
+		 long CreateFileMapping([in] long hFile, [in] void* securityAttr, [in] long flProtect, [in] long dwMaximumSizeHigh, [in] long dwMaximumSizeLow, [in] LPSTR lpName);
+      [entry("MapViewOfFile")]
+		 long MapViewOfFile([in] long hFileMappingObject, [in] long dwDesiredAccess, [in] long dwFileoffsetHigh, [in] long dwFileoffsetLow, [in] long dwNumberOfBytesToMap);
+      [entry("UnmapViewOfFile")]
+		 long UnmapViewOfFile([in] void* lpBaseAddress);
+      [entry("OpenFileMappingA")]
+		 long OpenFileMapping([in] long dwDesiredAccess, [in] long bInheritHandle, [in] LPSTR lpName); 
+      [entry("RtlZeroMemory")]
+		 void ZeroMemory([in] void* Destination, [in] long Length);
+      [entry("WideCharToMultiByte")]
+		long WideCharToMultiByte([in] long CodePage,[in] long dwFlags, [in] void* lpWideCharStr, [in] long cchWideChar, [in] void* lpMultiByteStr, [in] long cchMultiByte, [in] long lpDefaultChar, [in] long lpUsedDefaultChar);
+     };
+
+    [dllname("user32.dll")]
+    module User32 {
+      [entry("CallWindowProcA")] 
+	         long CallWindowProcA([in] long lpPrevWndFunc, [in] long hWnd, [in] long uMsg, [in] long wParam, [in] long lParam);
+      [entry("CallWindowProcW")] 
+	         long CallWindowProcW([in] long lpPrevWndFunc, [in] long hWnd, [in] long uMsg, [in] long wParam, [in] long lParam);
+      [entry("DestroyIcon")]
+		long DestroyIcon([in] long hIcon);
+      [entry("FindWindowExA")]
+		long FindWindowEx([in] long hWnd1, [in] long hWnd2, [in] LPSTR lpsz1, [in] LPSTR lpsz2);
+      [entry("GetDoubleClickTime")]
+		long GetDoubleClickTime(void);
+      [entry("GetDesktopWindow")]
+		long GetDesktopWindow(void);
+      [entry("GetWindowThreadProcessId")]
+		long GetWindowThreadProcessId([in] long hWnd, [in, out] void* lpdwProcessId);
+      [entry("IsWindowUnicode")]
+		long IsWindowUnicode([in] long hwnd);
+      [entry("PostMessageA")]
+         	long PostMessage([in] long hWnd, [in] long wMsg, [in] long wParam, [in] long lParam);
+      [entry("RegisterWindowMessageA")]
+		long RegisterWindowMessage([in] LPSTR lpString);
+      [entry("SendMessageA")]
+	         long SendMessage([in] long hWnd, [in] long wMsg, [in] long wParam, [in] void* lParam);
+      [entry("SendMessageTimeoutA")]
+		long SendMessageTimeout([in] long hwnd, [in] long msg, [in] long wParam, [in] void* lParam, [in] long fuFlags, [in] long uTimeout, [in, out] void* lpdwResult);
+      [entry("SetWindowsHookExA")]
+         	long SetWindowsHookEx([in] long idHook, [in] long lpfn, [in] long hmod, [in] long dwThreadId);
+      [entry("SetWindowLongA")] 
+	         long SetWindowLongA([in] long hWnd, [in] long nIndex, [in] long dwNewLong);
+      [entry("GetWindowLongA")]
+		long GetWindowLong([in] long hwnd,[in] long nIndex);
+      [entry("SetWindowLongW")] 
+	         long SetWindowLongW([in] long hWnd, [in] long nIndex, [in] long dwNewLong);
+      [entry("UnhookWindowsHookEx")]
+	         long UnhookWindowsHookEx([in] long hhk);
+	[entry("MessageBoxA")]
+		long MessageBox([in] long hWnd, [in] LPSTR lpText, [in] LPSTR lpCaption, [in] long wType);
+      [entry("SetWindowTextA")]
+		long SetWindowText([in] long hwnd, [in] LPSTR lpString);
+      [entry("DefWindowProcA")]
+		long DefWindowProcA([in] long hWnd, [in] long uMsg, [in] long wParam, [in] long lParam);
+      [entry("DefWindowProcW")]
+		long DefWindowProcW([in] long hWnd, [in] long uMsg, [in] long wParam, [in] long lParam);
+      [entry("AppendMenuA")]
+		long AppendMenu([in] long hMenu, [in] long wFlags, [in] long wIDNewItem, [in] LPSTR lpNewItem);
+      [entry("InsertMenuA")]
+		long InsertMenu([in] long hMenu, [in] long nPosition, [in] long wFlags, [in] long wIDNewItem, [in] LPSTR lpNewItem);
+      [entry("CreatePopupMenu")]
+		long CreatePopupMenu(Void);
+      [entry("CreateMenu")]
+		long CreateMenu(void);
+      [entry("DestroyMenu")]
+		long DestroyMenu([in] long hMenu);
+      [entry("GetMenuItemCount")]
+		long GetMenuItemCount([in] long hMenu);
+    };
+
+
+    [dllname("comctl32.dll")]
+    module Comctl32 {
+      [entry("ImageList_GetIcon")]
+	long ImageList_GetIcon([in] long himl, [in] long Index, [in] long flags);
+
+    };
+
+};
